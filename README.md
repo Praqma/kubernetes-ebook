@@ -1,2 +1,0 @@
-# kubernetes-ebook
-# kubernetes-ebook
