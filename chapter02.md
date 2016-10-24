@@ -1,5 +1,5 @@
 Kubernetes ebook
-# Chapter 2: Setup Infrastructure
+# Chapter 2: Infrastructure design and provisioning
 
 **todo- editor**: I have merged chapter 2 and 3 (from the original outline) together to form chapter 2.
 
@@ -39,7 +39,7 @@ Though not abolsulutely necessary, we also need a shared storage solution to dem
 In Kubernetes, `NodePort` is way to expose a service to the outside world - when you specify it in the `kubectl expose <service> --type=NodePort` (todo - confirm / verify). What this does is that it allows you to expose a service on the worker node, just like you can do the port mapping on a simple docker host. This makes the service available through all the worker nodes, because node port works it's magic by setting up certain iptables rules on all worker nodes. So no matter which port you land on (from outside the cluster), the service responds to you. However, to do this, you need to have the external DNS pointing to the worker nodes. e.g. www.example.com can have two A type addresses in DNS pointing to the IP addresses of two worker nodes. In case a node fails, DNS will do it's own DNS round robin. This may work, but DNS round robin does not work well with sticky sessions. Also, managing services through ports is kind of difficult to manage / keep track of. Plus it is totally uncool! (todo: editor can remove this if unhappy :(  ).
 
 
-## The choice of HA technology for etcd, controller and load balancers:
+## The choice of HA technology for etcd, controllers and load balancers:
 
 We selected three nodes for the etcd service. First, because it stores the meta data about our cluster, which is most important. Secondly etcd nodes can form their own individual/independent cluster. To satisfy the needs of a quorum, we decided to use three nodes for etcd cluster. This means failure of one node does not affect the etcd operation. (todo: rewrite:) In order for etcd cluster to be healthy, it needs to have quorum. i.e. alive nodes being more than half of the size of the total number of nodes of etcd cluter. So having a total of two nodes is not helpful. When one fails, the etcd custer will instantly become unhealthy. This is what we do not want to happen in a production cluster.
 
@@ -66,7 +66,7 @@ The dns domainname we will use in this setup is `example.com` . Each node will h
 We are using Fedora 24 64 bit server edition - on all nodes (Download from [here](https://getfedora.org/en/server/download/) ). You can use a Linux distribution of your choice. 
 For poeple wanting to use Fedora Atomic, we would like to issue a warning. Fedora Atomic is a collection of binaries (etcd, kubernetes) bundled together (in a read only  filesystem), and individual packages *cannot* be updated. There is no yum/dnf, etc. In this book we are using Kubernetes 1.3 (the latest version), which is still not part of Fedora Atomic 24, so we decided to use Fedora 24 server edition (in minimal configuration), and added the packages we need directly from their official websites.
 
-# Supporting software needed for this setup:
+## Supporting software needed for this setup:
 * Kubernetes - 1.3.0 or later (Download latest from Kubernetes website)
 * etcd - 2.2.5 or later (The one that comes with Fedora is good enough)
 * Docker - 1.11.2 or later (Download latest from Docker website)
@@ -74,7 +74,7 @@ For poeple wanting to use Fedora Atomic, we would like to issue a warning. Fedor
 * Linux IPVS, heartbeat / pacemaker (todo) 
 
 
-# Expectations
+## Expectations
 
 With the infrastructure choices made above, we have hope to have the following working on our Kubernetes cluster.
 
@@ -86,15 +86,28 @@ With the infrastructure choices made above, we have hope to have the following w
 * Default Service accounts and Secrets
 * Load Balancer (in H/A configuration)
 
+
+Before we start building VMs, we would like to hightlight few things about Kubernetes networking.
+
+## Kubernetes Networking:
+Kubernetes uses three different types of networks. They are:
+
+* Infrastructure Network: The network your physical (or virtual) machines are connected to. Normally your production network, or a part of it.
+* Service Network: The (completely) virtual (rather fictional) network, which is used to assign IP addresses to Kubernetes Services, which you will be creating. (A Service is a frontend to a RC or a Deployment). It must be noted that IP from this network are **never** assigned to any of the interfaces of any of the nodes/VMs, etc. These (Service IPs) are used behind the scenes by kube-proxy to create (weird) iptables rules on the worker nodes. 
+* Pod Network: This is the network, which is used by the pods. However it is not a simple network either, depending on what kubernetes network solution you are employing. If you are using flannel, then this would be a large software defined overlay network, and each worker node will get a subnet of this network and configured for it's docker0 interface (in very simple words, there is a little more to it). If you are employing CIDR network, using CNI, then it would be a large network called **cluster-cidr** , with small subnets corresponding to your worker nodes. The routing table of the router handling your part of infrastructure network will need to be updated with routes to these small subnets. This proved to be a challenge on AWS VPC router, but this is piece of cake on a simple/generic router in your network. I will be doing it on my work computer, and setting up routes on Linux is a very simple task.
+
+Kelsey used the following three networks in his guide, and I intend to use the same ones, so people following this guide, but checking his guide for reference are not confused in different IP schemes. So here are my three networks , which I will use for this guide.
+
+* Infrastructure network:     10.240.0.0/24 
+* Service Network:            10.32.0.0/24 
+* Pod Network (Cluster CIDR): 10.200.0.0/16 
+
+
 # Infrastructure layout / network layout:
 
-Our cluster, when complete, will look something like this: 
-
-(todo : re-draw diagram to accomodate mutiple load balancers, and VIPs, etc).
-
+Building upon the information we have gathered so far, especially about the Kubernetes networking, we have designed our cluster to look like this: 
 
 ![images/Kubernetes-BareMetal-Cluster-setup.png](images/Kubernetes-BareMetal-Cluster-setup.png)
-
 
 
 # Infrastructure provisioning
@@ -103,9 +116,11 @@ Note that I am doing this provisioning on my work computer, which is Fedora 23 6
 
 First, setting up the new infrastructure network in KVM.
 
+If you use libvirt, then you probably know that libvirt sets up a virtual network `192.168.124.0/24` and sets it up as default. We wanted to be Kelsey's guide as possible (todo: editor, should we mention that?), so my infrastructure network is going to be `10.240.0.0/24` . I will just create a new virtual network (10.240.0.0/24) on my work computer.
+
 ## Setup new virtual network in KVM:
 
-Start Virtual Machine Manager and go to "Edit"->"Connection Details"->"Virtual Networks" . Then follow the steps shown below to create a new virtual network. Note that this is a NAT network, connected to any/all physical devices on my computer. So whether I am connected to wired network, or wireless, it will work.
+Start Virtual Machine Manager and go to "Edit"->"Connection Details"->"Virtual Networks" . Then follow the steps shown below to create a new virtual network and name it **Kubernetes**. Note that this is a NAT network, connected to any/all physical devices on my computer. So whether I am connected to wired network, or wireless, it will work.
 
 ![images/libvirt-new-virtual-network-1.png](images/libvirt-new-virtual-network-1.png)
 ![images/libvirt-new-virtual-network-2.png](images/libvirt-new-virtual-network-2.png)
@@ -116,22 +131,22 @@ Start Virtual Machine Manager and go to "Edit"->"Connection Details"->"Virtual N
 
 The wizard will create an internal DNS setup (automatically) for example.com .
 
-Now, we have the network out of the way, I will start creating VMs and attach them to this virtual network.
+Now, we have the network out of the way, lets decide upon the size of these virtual machines, and what IPs will be assigned to them. Then, at the time of VM creation, we will attach them (VMs) to this new virtual network.
 
 
 ## IP addresses and VM provisioning:
 
-Here are the sizes (and related IP addresses) of VMs I am creating:
+Here IP addresses of VMs we are about to create:
 
-* etcd1		512 MB RAM	4 GB disk	10.240.0.11/24
-* etcd2		512 MB RAM	4 GB disk	10.240.0.12/24
-* etcd3		512 MB RAM	4 GB disk	10.240.0.13/24
-* controller1	512 MB RAM	4 GB disk	10.240.0.21/24
-* controller2	512 MB RAM	4 GB disk	10.240.0.22/24
-* worker1	1.5 GB RAM	20 GB disk	10.240.0.31/24
-* worker2	1.5 GB RAM	20 GB disk	10.240.0.32/24
-* lb1		512 MB RAM	4 GB disk	10.240.0.41/24
-* lb2		512 MB RAM	4 GB disk	10.240.0.42/24
+* etcd1		10.240.0.11/24
+* etcd2		10.240.0.12/24
+* etcd3		10.240.0.13/24
+* controller1	10.240.0.21/24
+* controller2	10.240.0.22/24
+* worker1	10.240.0.31/24
+* worker2	10.240.0.32/24
+* lb1		10.240.0.41/24
+* lb2		10.240.0.42/24
 
 **Notes:**
 * There will be (additional) floating IP/VIP for controllers, which will be: `10.240.0.20` 
@@ -163,7 +178,7 @@ Here are the sizes (and related IP addresses) of VMs I am creating:
 * The last screenshot is from the installation of second etcd node (etcd2). (todo: may be we can get a new screenshot?)
 
 
-## Actual resource utilization from a running Kubernetes cluster.
+## Actual resource utilization from a running Kubernetes cluster:
 To give you an idea about how much RAM (and othere resources) are actually used by each type of node, we have provided some details from the nodes of a similar Kubernetes cluster. It should help you size your VMs accordingly. Though for production setups, you definitely want more resources for each component. 
 
 
@@ -223,6 +238,134 @@ Mem:           1496         168         139           0        1188        1104
 Swap:          1023           0        1023
 [root@worker1 ~]# 
 ```
+
+## Prepare the OS on each node:
+
+We need a way to access the cluster in a uniform fashion, so it is recommended to updated your `/etc/hosts` file on your work computer, as per the design of your cluster:
+
+```
+[kamran@kworkhorse ~]$ sudo vi /etc/hosts
+127.0.0.1               localhost.localdomain localhost
+10.240.0.11     etcd1.example.com       etcd1
+10.240.0.12     etcd2.example.com       etcd2
+10.240.0.13     etcd3.example.com       etcd3
+10.240.0.20     controller.example.com 	controller 	controller-vip
+10.240.0.21     controller1.example.com controller1
+10.240.0.22     controller2.example.com controller2
+10.240.0.31     worker1.example.com     worker1
+10.240.0.32     worker2.example.com     worker2
+10.240.0.40	lb.example.com		lb		lb-vip
+10.240.0.41	lb1.example.com		lb1
+10.240.0.42	lb2.example.com		lb2
+```
+
+We will copy this file to all nodes in just a moment. First, we create RSA-2 keypair for SSH connections and copy our key to all the nodes. This way, we can ssh into them without requiring a password.
+
+If you do not have a RSA keypair generated already you can do that by using the following command on your work computer:
+
+```
+ssh-keygen -t rsa
+```
+**Note:** It is recommended that you have a passphrase assigned to our key. The key is useless without a passphrase if stolen. So having a passphrase protected key is always a good idea.
+
+
+Assuming you already have a rsa keypair generated, the command to copy the public part of the keypair to the nodes will be:
+
+```
+ssh-copy-id root@<NodeName|NodeIP>
+```
+
+Sample run:
+```
+[kamran@kworkhorse ~]$ ssh-copy-id root@etcd1
+The authenticity of host 'etcd1 (10.240.0.11)' can't be established.
+ECDSA key fingerprint is SHA256:FUMy5JNZnaLXhkW3Y0/WlXzQQrjU5IZ8LMOcgBTOiLU.
+ECDSA key fingerprint is MD5:5e:9b:2d:ae:8e:16:7a:ee:ca:de:de:da:9a:04:19:8b.
+Are you sure you want to continue connecting (yes/no)? yes
+/usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed
+/usr/bin/ssh-copy-id: INFO: 2 key(s) remain to be installed -- if you are prompted now it is to install the new keys
+root@etcd1's password: 
+
+Number of key(s) added: 2
+
+Now try logging into the machine, with:   "ssh 'root@etcd1'"
+and check to make sure that only the key(s) you wanted were added.
+
+[kamran@kworkhorse ~]$ 
+```
+**Note:** You cannot run a loop for copying the keys, as each time it asks for confirmation of RSA fingerprint of the target node, and also the password for the root user for the first time. So this is manual step!
+
+
+After setting up your keys in all the nodes, you should be able to execute commands on the nodes using ssh:
+
+```
+[kamran@kworkhorse ~]$ ssh root@etcd1 uptime
+ 13:16:27 up  1:29,  1 user,  load average: 0.08, 0.03, 0.04
+[kamran@kworkhorse ~]$ 
+```
+
+
+Now, copy the `/etc/hosts` file to all nodes:
+
+```
+for node in etcd{1,2,3} controller{1,2} worker{1,2} lb{1,2} ; do scp /etc/hosts root@${node}:/etc/hosts ; done
+``` 
+
+
+After all VMs are created, we update OS on them using `yum -y update`, disable firewalld service, and also disable SELINUX in `/etc/selinux/config` file and reboot all nodes for these changes to take effect. 
+
+
+
+Disable firewall on all nodes:
+
+Note: For some strange reason, disabling `firewalld` service did not work. I had to actually remove the `firewalld` package from all of the nodes.
+```
+for node in etcd{1,2,3} controller{1,2} worker{1,2} lb{1,2} ; do ssh root@${node} "yum -y remove firewalld" ; done
+```
+
+
+Disable SELINUX on all nodes:
+
+```
+for node in etcd{1,2,3} controller{1,2} worker{1,2} lb{1,2} ; do ssh root@${node} "echo 'SELINUX=disabled' > /etc/selinux/config" ; done
+```
+**Note:** Setting the `/etc/selinux/config` file to only contain a single line saying `SELINUX=disabled` is enough to disabled SELINUX at next system boot.
+
+OS update on all nodes, and reboot:
+```
+for node in etcd{1,2,3} controller{1,2} worker{1,2} lb{1,2} ; do ssh root@${node} "yum -y update && reboot" ; done
+```
+
+After all nodes are rebooted, verify that SELINUX is disabled:
+
+```
+for i in node in etcd{1,2,3} controller{1,2} worker{1,2} lb{1,2} ; do ssh root@${i} "hostname; getenforce" ; done
+```
+
+Expected output from the above command:
+```
+[kamran@kworkhorse ~]$ for i in node in etcd{1,2,3} controller{1,2} worker{1,2} lb{1,2} ; do ssh root@${i} "hostname; getenforce"; done
+etcd1.example.com
+Disabled
+etcd2.example.com
+Disabled
+etcd3.example.com
+Disabled
+controller1.example.com
+Disabled
+controller2.example.com
+Disabled
+worker1.example.com
+Disabled
+worker2.example.com
+Disabled
+lb1.example.com
+Disabled
+lb2.example.com
+Disabled
+[kamran@kworkhorse ~]$ 
+```
+
 
 
 # Conclusion of chapter 2:
