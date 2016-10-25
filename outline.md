@@ -55,7 +55,7 @@ This document / ebook will show you how to setup a Kubernetes cluster on bare-me
 
 # Chapter 13: Cluster add-ons: 
 
-# Chapter 14: Monitoring and Alerting
+	# Chapter 14: Monitoring and Alerting
 * Some Visualizers (CAdvisor, fedora CockPit, kubernetes visualizer, etc)
 * Alerting?
 
