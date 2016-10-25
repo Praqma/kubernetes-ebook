@@ -26,17 +26,22 @@ This document / ebook will show you how to setup a Kubernetes cluster on bare-me
 * also talk about HA for controller nodes.
 * Include access control and Authentication/Authorization, etc.
 
-# Chapter 7: Kubernetes Worker nodes
+# Chapter 7: HA for Kubernetes Control Plane
+* Here we setup LVS/IPVS/Pacemaker to provide HA to Kubernetes.
+
+# Chapter 8: Kubernetes Worker nodes
 * Setup Kubernetes worker nodes. 
 * Including docker
 * Setup networking (flannel or CIDR)
+* Setup remote access with Kubectl
 
-# Chapter 8: Verify various cluster components
+
+# Chapter 9: Verify various cluster components
 * short chapter.
 * Just verification of components.
 * What to expect in logs, etc.
 
-# Chapter 9: Working with Kubernetes
+# Chapter 10: Working with Kubernetes
 * Setting up a work computer to use kubectl and talk to kubernetes master.
 * Creating a simple nginx RC/Deployment
 * Scaling a Deployment
@@ -44,14 +49,17 @@ This document / ebook will show you how to setup a Kubernetes cluster on bare-me
 * Creating a service using cluster IP and accessing it from within pod network
 * Creating a service using external IP and accessing it from outside the cluster network and also outside of kubernetes cluster.
 
-# Chapter 10: Praqma Load Balancer
+# Chapter 11: Praqma Load Balancer
 
-# Chapter 11: Accessing HA Kubernetes service from outside the network
+# Chapter 12: Accessing HA Kubernetes service from outside the network 
 
-# Chapter 12: Cluster add-ons: 
-* DNS
-* Visualizer, etc.
+# Chapter 13: Cluster add-ons: 
 
+# Chapter 14: Monitoring and Alerting
+* Some Visualizers (CAdvisor, fedora CockPit, kubernetes visualizer, etc)
+* Alerting?
+
+Appendix A: DNS (dnsmasq)
 
 
  
