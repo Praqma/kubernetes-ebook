@@ -2,46 +2,46 @@ This document / ebook will show you how to setup a Kubernetes cluster on bare-me
 
 **Note:** The order of the chapters can change. This outline will change heavily in the coming days / weeks. 
 
-# Chapter 1: What is Kubernetes?
+# [Chapter 1: What is Kubernetes?](chapter01.md)
 * (and why not plain docker, or docker swarm, etc?)
 * Concepts and terminology of Kubernetes.
 
-# Chapter 2: Selection of infrastructure and network technologies
+# [Chapter 2: Selection of infrastructure and network technologies](chapter02.md)
 * Write about what type of hardware is needed. If not physical hardware, then what size of VMs are needed. etc.
 * Discuss what type of network technologies are we going to use. Such as flannel or CIDR, etc.
 * This will be a relatively short chapter.
 
-# Chapter 3: Provisioning of machines, Network setup
+# [Chapter 3: Provisioning of machines, Network setup](chapter03.md)
 * Here we provision our machines, and also setup networking.
 * This will have a couple of diagrams
 
-# Chapter 4: SSL certificates
+# [Chapter 4: SSL certificates](chapter04.md)
 
-# Chapter 5: etcd nodes
+# [Chapter 5: etcd nodes](chapter05.md)
 * Talk about what etcd is and how to set it up, including it's installation 
 * Also show how to to setup etcd in HA mode.
 
-# Chapter 6: Kubernetes Master/Controller nodes
+# [Chapter 6: Kubernetes Master/Controller nodes](chapter06.md)
 * Talk about how kubernetes master node is setup
 * also talk about HA for controller nodes.
 * Include access control and Authentication/Authorization, etc.
 
-# Chapter 7: HA for Kubernetes Control Plane
+# [Chapter 7: HA for Kubernetes Control Plane](chapter07.md)
 * Here we setup LVS/IPVS/Pacemaker to provide HA to Kubernetes.
 
-# Chapter 8: Kubernetes Worker nodes
+# [Chapter 8: Kubernetes Worker nodes](chapter08.md)
 * Setup Kubernetes worker nodes. 
 * Including docker
 * Setup networking (flannel or CIDR)
 * Setup remote access with Kubectl
 
 
-# Chapter 9: Verify various cluster components
+# [Chapter 9: Verify various cluster components](chapter09.md))
 * short chapter.
 * Just verification of components.
 * What to expect in logs, etc.
 
-# Chapter 10: Working with Kubernetes
+# [Chapter 10: Working with Kubernetes](chapter10.md)
 * Setting up a work computer to use kubectl and talk to kubernetes master.
 * Creating a simple nginx RC/Deployment
 * Scaling a Deployment
@@ -49,17 +49,17 @@ This document / ebook will show you how to setup a Kubernetes cluster on bare-me
 * Creating a service using cluster IP and accessing it from within pod network
 * Creating a service using external IP and accessing it from outside the cluster network and also outside of kubernetes cluster.
 
-# Chapter 11: Praqma Load Balancer
+# [Chapter 11: Praqma Load Balancer](chapter11.md)
 
-# Chapter 12: Accessing HA Kubernetes service from outside the network 
+# [Chapter 12: Accessing HA Kubernetes service from outside the network](chapter12.md)
 
-# Chapter 13: Cluster add-ons: 
+# [Chapter 13: Cluster add-ons](chapter13.md) 
 
-	# Chapter 14: Monitoring and Alerting
+# [Chapter 14: Monitoring and Alerting](chapter14.md)
 * Some Visualizers (CAdvisor, fedora CockPit, kubernetes visualizer, etc)
 * Alerting?
 
-Appendix A: DNS (dnsmasq)
+[Appendix A: DNS (dnsmasq)](appendix-a.md)
 
 
  
