@@ -1,36 +1,36 @@
 # Chapter 1: Kubernetes introduction
 
-This chapter is all about what Kubernetes is. 
+This chapter is meant to offer an introductory overview to Kubernetes. 
 
-We would assume that you already know about what containers are, and what Docker is, and now you want to take the next logical step by moving to Kubernetes. We will give you a refresher anyway!
+It is assumed that the reader already knows what containers are, what Docker is, and wants to take the next logical step by looking at Kubernetes. But, if your memory is a bit rusty a quick refresher is provided anyway!
 
 
 ## The golden era of virtual machines:
-Before containers came along, we all used virtual machines to setup different (guest) operating systems running on top of main operating system of our computer. XEN, KVM, VMWare, VirtualBox, Microsoft Virtual PC and later Hyper-V are few popular virtualization solutions. Virtual machines allowed us to slice the resources of our computer, mainly RAM and CPU - and hard drive, and give it to different virtual machines connected through a virtual network on that physical machine. This was so because most of the time people were using barely 5-10% of the resources of a given physical machine. Virtual machines were cool, and saved a lot of money for a lot of people! All of a sudden all that wasted hardware resources on each physical server were being utilized by multiple virtual machines. There is something called a vitualization ration, which is ratio of physical server and the number of VMs running on it. With virtualization people achieved 1:20 and more! 
+Before containers came along we all used virtual machines to setup different (guest) operating systems that ran on top of the main operating system of our computer. XEN, KVM, VMWare, VirtualBox, Microsoft Virtual PC and later Hyper-V are a few popular virtualization solutions. Virtual machines allowed us to slice the resources of our computer, mainly RAM, CPU, and hard drive, and give it to different virtual machines connected through a virtual network on a physical machine. This development came about because most of the time people were using barely 5-10% of the resources of a given physical machine. Virtual machines were cool, and saved a lot of money for a lot of people! All of the wasted hardware resources on each physical server were now being utilized by multiple virtual machines. There is something called a vitualization ratio which is the number of VMs running on a physical server. With virtualization people achieved 1:20 and sometimes more! 
 
-The downside of virtualization was (still is) that each VM would need a full OS installation. Each VM running on one physical machine just shares hardware resources and nothing else. So a full OS was the only way to go. Which may be an advantage too, as it was possible to have Windows and Linux VMs on the same physical hardware. Though the full OS is what makes VM very bulky in software sense. So if one had to run only a small web server say Apache, or Nginx, a full (albeit minimal) installation of Linux OS is required. 
+The downside of virtualization was (still is) that each VM requires a full OS installation. Each VM running on a physical machine shares only the hardware resources and nothing else, so a full OS was the only solution. This can be advantageous as it allows for Windows and Linux VMs on the same physical hardware, but the full OS is what makes VM very bulky in a software sense. Therefore, if you have to run only a small web server on say, Apache, or Nginx, a full (albeit minimal) installation of Linux OS is required. 
 
-In terms of automation, VMs pose a challenge of requiring full fledge provisioning software, and configuration managers which are required to automate the installation of multipe VMs on one or more physical machines.
+In terms of automation VMs pose a significant challenge; fully fledged provisioning software and configuration managers which are required to automate the installation of multipe VMs on one or more physical machines are required.
 
-So the itch that "why do I need a full blown OS just to run Apache?" , soon resulted in discovery of a solution to this (itch). Linux Kernel 2.6.24 introduced cgroups (Control Groups) , and LXC - Linux Containers, was born, first released in August 2008. 
+But, people began to ask "why do I need a full blown OS just to run Apache?" and before long a solution was found that eliminated this requirement. Linux Kernel 2.6.24 introduced cgroups (Control Groups) and LXC - Linux Containers - was born and first released in August 2008. 
 
-LXC provides operating system-level virtualization through a virtual environment that has its own process and network space, instead of creating a full-fledged virtual machine. LXC relies on the Linux kernel cgroups functionality. It also relies on other kinds of namespace isolation functionality - such as network namespaces, which were developed and integrated into the mainline Linux kernel.
+Instead of creating a fully-fledged virtual machine LXC provides operating system-level virtualization through a virtual environment that has its own process and network space. LXC relies on the Linux kernel cgroups functionality. It also relies on other kinds of namespace isolation functionality, such as network namespaces, which were developed and integrated into the mainline Linux kernel.
 
-With LXC, it was suddenly possible to run just the piece of software you wanted to run in an isolated (sort of change-rooted) environment, by just having enough supporting libarires in the container, and sharing the Linux kernel from the host OS running on the physical machine. So, to run Apache, one does not need to have a full blown linux OS anymore! 
+With LXC it became possible to run only the required piece of software in an isolated (sort of change-rooted) environment by having just enough supporting libraries in the container, and by sharing the Linux kernel from the host OS running on the physical machine. So, to run Apache, a full blown linux OS was no longer needed! 
 
-In 2013, Docker seazed the opportunity by creating a very usable and user-friendly container (image) format around LXC and provided necessary tooling to create, and manage containers on Linux OS. This brought Docker to limelight, and actually made Docker so popular that many people mistakenly think that Docker is the software (or company) which brough them containers. This is of-course not true. Docker just made it super easy to use containers. 
+In 2013 Docker seized the opportunity to create a very usable and user-friendly container (image) format around LXC and provided the necessary tooling to create and manage containers on Linux OS. This brought Docker into the limelight and made them so popular that many people mistakenly think that Docker is the software (or company) which invented containers. This is, of course, not true. Docker just made it super easy to use containers. 
 
-With that, all of a sudden the golden era of VMs came to an end, and the golden era of containers started. 
+The golden era of VMs came to an end, and the golden era of containers started. 
 
 # Docker Containers
 
 Best explained from Docker's own web pages:
 
->Docker containers wrap up a piece of software in a complete filesystem that contains everything it needs to run: code, runtime, system tools, >system libraries – anything you can install on a server. This guarantees that it will always run the same, regardless of the environment it is >running in.
+>Docker containers wrap up a piece of software in a complete filesystem that contains everything it needs to run: code, runtime, system tools, system libraries – anything you can install on a server. This guarantees that it will always run the same, regardless of the environment it is running in.
 
-Docker uses the resource isolation features of the Linux kernel such as cgroups and kernel namespaces, and a union-capable file system such as aufs and others to allow independent "containers" to run within a single Linux instance, avoiding the overhead of starting and maintaining virtual machines. This helps Docker to provide an additional layer of abstraction and automation of operating-system-level virtualization on Linux.
+Docker uses the resource isolation features of the Linux kernel, such as cgroups and kernel namespaces, and a union-capable file system such as aufs and others to allow independent "containers" to run within a single Linux instance, avoiding the overhead of starting and maintaining virtual machines. This helps Docker to provide an additional layer of abstraction and automation of operating-system-level virtualization on Linux.
 
-So running Apache web server on some (physical or virtual) Linux computer would be as simple as:
+So running an Apache web server on some (physical or virtual) Linux computer would be as simple as:
 
 ```
 [kamran@kworkhorse kamran]$ docker run -p 80:80 -d httpd
@@ -47,7 +47,7 @@ Status: Downloaded newer image for httpd:latest
 [kamran@kworkhorse kamran]$ 
 ```
 
-The -p 80:80 binds the container's port 80 to the host's port 80. To make sure that it is actually running on port 80 on the host. We verify:
+The -p 80:80 binds the container's port 80 to the host's port 80. To make sure that it is actually running on port 80 on the host we verify:
 
 ```
 [kamran@kworkhorse kamran]$ docker ps
