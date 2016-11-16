@@ -1,13 +1,13 @@
 # Chapter 04: SSL Certificates
 
-We have our nodes provisioned, updated, keys synched, everthing. Now the next logical step is to configure Kubernetes software components on the nodes. However, we need SSL certificates first. So in this chapter, we generate SSL certificates.
+We have our nodes provisioned, updated and keys synched. The next logical step is to configure Kubernetes software components on the nodes. However, before we do that, we to generate SSL certificates and this chapter will show us how.
 
 # Configure / setup TLS certificates for the cluster:
 
 Reference: [https://github.com/kelseyhightower/kubernetes-the-hard-way/blob/master/docs/02-certificate-authority.md](https://github.com/kelseyhightower/kubernetes-the-hard-way/blob/master/docs/02-certificate-authority.md)
 
 
-Before we start configuring various services on the nodes, we need to create the SSL/TLS certifcates, which will be used by the kubernetes components . Here I will setup a single certificate, but in production you are advised to create individual certificates for each component/service. We need to secure the following Kubernetes components:
+Before we start configuring services on the nodes we need to create the SSL/TLS certifcates which will be used by the Kubernetes components. Here I will setup a single certificate, but in production you are advised to create individual certificates for each component/service. We need to secure the following Kubernetes components:
 
 * etcd
 * Kubernetes API Server
@@ -71,7 +71,7 @@ echo '{
 ```
 
 
-Now, generate CA certificate and it's private key:
+Now generate a CA certificate and its private key:
 
 ```
 cfssl gencert -initca ca-csr.json | cfssljson -bare ca
@@ -96,10 +96,10 @@ ca-key.pem
 ca.csr
 ```
 
-In the list of generated files above, **ca.pem** is your CA certificate, **ca-key.pem** is the CA-certificate's private key, and **ca.csr** is the certificate signing request for this certificate.
+In the above list of generated files **ca.pem** is your CA certificate, **ca-key.pem** is the CA-certificate's private key, and **ca.csr** is the certificate signing request for this certificate.
 
 
-You can verify that you have a certificate, by using the command below:
+You can verify that you have a certificate by using the command below:
 
 ```
 openssl x509 -in ca.pem -text -noout
@@ -177,7 +177,7 @@ Certificate:
 
 
 
-We should also setup an environment variable named `KUBERNETES_PUBLIC_IP_ADDRESS` with the value `10.240.0.20` . This will be handy in the next step.
+We should also setup an environment variable named `KUBERNETES_PUBLIC_IP_ADDRESS` with the value `10.240.0.20` . This will come in handy during the next step.
 
 Above explanation is not entirely true.
 
