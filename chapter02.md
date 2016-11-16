@@ -86,10 +86,10 @@ So, when you setup a Kubernetes cluster and start up your first pod it is deploy
 
 
 * Infrastructure Network: The network your physical (or virtual) machines are connected to. Normally your production network, or a part of it.
-* Service Network: The completely virtual network used to assign IP addresses to Kubernetes Services which you will be creating. A Service is a front-end to a RC or a Deployment. It must be noted that the IPs from this network are **never** assigned to any of the interfaces of any of the nodes/VMs, etc. These (Service IPs) are used behind the scenes by kube-proxy to create (weird) iptables rules on the worker nodes. 
-* Pod Network: This is the network which is used by the pods. However, depending on what kubernetes network solution you are employing, it isn't necessarily a simple network either. If you are using flannel then it will be a large software defined overlay network, and each worker node will receive a subnet of this network configured for its Docker0 interface (in very simple words, there is a little more to it). If you are employing a CIDR network, using CNI, then it would be a large network called **cluster-cidr** , with small subnets corresponding to your worker nodes. The routing table of the router handling your part of infrastructure network will need to be updated with routes to these small subnets. This proved to be a challenge on AWS VPC router, but this is piece of cake on a simple/generic router in your network. I will be doing it on my work computer, and setting up routes on Linux is a very simple task.
+* Service Network: The completely virtual network used to assign IP addresses to the Kubernetes Services you will be creating. A Service is a front-end to a RC or a Deployment. It must be noted that the IPs from this network are **never** assigned to any of the interfaces of any of the nodes/VMs, etc. These (Service IPs) are used behind the scenes by kube-proxy to create special iptables rules on the worker nodes. 
+* Pod Network: This is the network which is used by the pods. However, depending on the kubernetes network solution you are employing, this can also be quite a complex network too. If you are using flannel then it will be a large software defined overlay network, and each worker node will receive a subnet of this network configured for its Docker0 interface (this is a simplification, there is a little more to it). If you are employing a CIDR network, using CNI, then it would be a large network called **cluster-cidr** with small subnets corresponding to your worker nodes. The routing table of the router handling your part of infrastructure network will need to be updated with routes to these small subnets. This is a challenge on a AWS VPC router, but it's a piece of cake on a simple/generic router in your network. I will be doing it on my work computer, and setting up routes on Linux is a very simple task.
 
-Kelsey used the following three networks in his guide, and we intend to use the same ones, so people are not confused in different IP schemes when they are following this book and at the same time checking his guide. Below are the three networks , which we will use in this book.
+Kelsey used the following three networks in his guide. We will use the same ones so people aren't confused by different IP schemes when they're following this book and at the same time checking his guide. Below are the three networks which we will use in this book.
 
 * Infrastructure network:     10.240.0.0/24 
 * Service Network:            10.32.0.0/24 
@@ -98,7 +98,7 @@ Kelsey used the following three networks in his guide, and we intend to use the 
 
 # Infrastructure layout:
 
-Building upon the information we have gathered so far, especially about the Kubernetes networking, we have designed our cluster to look like this: 
+Building upon the information we've gathered so far, especially about Kubernetes networking, we have designed our cluster to look like this: 
 
 ![images/Kubernetes-BareMetal-Cluster-setup.png](images/Kubernetes-BareMetal-Cluster-setup.png)
 
@@ -106,13 +106,13 @@ Building upon the information we have gathered so far, especially about the Kube
 # Other software components of the cluster:
 
 ## DNS:
-It is understood that all nodes in this cluster will have some hostname assigned to them. It is important to have consistent hostnames, and if there is a DNS server in your infrastructure, then it is also important what are the reverse lookup names of these nodes. This information is  critical at the time when you will generate SSL certificates. 
+It is understood that all nodes in this cluster will have some hostname assigned to them. It is important to have consistent hostnames, and if there is a DNS server in your infrastructure the reverse lookup names of these nodes is also important. This information is critical when you generate SSL certificates. 
 
-The dns domainname we will use in this setup is `example.com` . Each node will have a hostname in the form of `*hostname*.example.com` . If you do not have a DNS setup yet, it is good time to set it up now. As we mentioned this earlier, we are using Libvirt/KVM to provide VMs for our example setup. It would be interesting for you to know that libvirt has build in DNS service called `dnsmasq`. Setting up dnsmasq service is very simple. The dnsmasq service uses the `/etc/hosts` file for name resolution. So we will populate our `/etc/hosts` file with the necessary hostnames and corresponding IP addresses and restart the dnsmasq service. That way, any nodes (including our local work computer), which use dnsmasq, will resolve the example.com related hostnames correctly. 
+The dns domain name we will use in this setup is `example.com`. Each node will have a hostname in the form of `*hostname*.example.com`. If you do not have a DNS setup now is a good time to do it. As we mentioned earlier we are using Libvirt/KVM to provide VMs for our example setup. Interestingly, Libvirt has a built-in DNS service called `dnsmasq` and setting up the dnsmasq service is very simple. The dnsmasq service uses the `/etc/hosts` file for name resolution, so we will populate our `/etc/hosts` file with the necessary hostnames and corresponding IP addresses and restart the dnsmasq service. That way any nodes, including our local work computer, which use dnsmasq will resolve the example.com related hostnames correctly. 
 
 ## Operating System:
-We are using Fedora 24 64 bit server edition - on all nodes (Download from [here](https://getfedora.org/en/server/download/) ). You can use a Linux distribution of your choice. 
-For poeple wanting to use Fedora Atomic, we would like to issue a warning. Fedora Atomic, (great distribtion), is a collection of binaries (etcd, kubernetes) bundled together (in a read only  filesystem), and individual packages *cannot* be updated. There is no yum/dnf, etc. In this book we are using Kubernetes 1.3 (the latest version), which is still not part of Fedora Atomic 24, so we decided to use Fedora 24 server edition (in minimal configuration), and added the packages we need directly from their official websites.
+We are using Fedora 24 64 bit server edition on all nodes (Download from [here](https://getfedora.org/en/server/download/) ). You can use a Linux distribution of your choice. 
+We'd like to issue a warning for anyone looking to use Fedora Atomic. While it has great distribtion it is a collection of binaries (etcd, kubernetes) bundled together in a read only filesystem and individual packages *cannot* be updated. There is no yum/dnf, etc. In this book we are using Kubernetes 1.3 (the latest version) which is still not part of Fedora Atomic 24, so we decided to use the Fedora 24 server edition, in minimal configuration, and added the packages we needed directly from their official websites.
 
 ## Supporting software needed for this setup:
 * Kubernetes - 1.3.0 or later (Download latest from Kubernetes website)
@@ -124,7 +124,7 @@ For poeple wanting to use Fedora Atomic, we would like to issue a warning. Fedor
 
 ## Expectations
 
-With the infrastructure choices made above, we have hope to have the following working on our Kubernetes cluster.
+With the infrastructure choices made above we would hope to have the following working on our Kubernetes cluster.
 
 * 3 x etcd nodes (in H/A configuration) 
 * 2 x Kubernetes controller nodes (in H/A configuration) 
@@ -135,4 +135,4 @@ With the infrastructure choices made above, we have hope to have the following w
 * Load Balancer (in H/A configuration)
 
 # Summary:
-In this chapter, we designed our infrastructure. Hurray!
+In this chapter we designed our infrastructure. Hooray!
