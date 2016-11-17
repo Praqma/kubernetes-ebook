@@ -2,13 +2,13 @@
 
 
 * Ease of deployment and configuration
-* Avoid mixing arbitrary workloads with critical cluster components. We are building machine with just enough resources so we don't have to worry about wasting resources.
+* Avoid mixing arbitrary workloads with critical cluster components. We are building the machine with just enough resources to avid being wasteful. 
 
 ## Provision the Kubernetes Worker Nodes
 
 Run the following commands on all worker nodes.
 
-Move the TLS certificates in place
+Move the TLS certificates into place
 ```
 sudo mkdir -p /var/lib/kubernetes
 sudo mv ca.pem kubernetes-key.pem kubernetes.pem /var/lib/kubernetes/
@@ -77,7 +77,7 @@ Server:
 
 ## Setup kubelet on worker nodes:
 
-The Kubernetes kubelet no longer relies on docker networking for pods! The Kubelet can now use CNI - the Container Network Interface to manage machine level networking requirements.
+The Kubernetes kubelet no longer relies on Docker networking for pods! The Kubelet can now use CNI - the Container Network Interface - to manage machine level networking requirements.
 
 Download and install CNI plugins
 
@@ -88,7 +88,7 @@ wget https://storage.googleapis.com/kubernetes-release/network-plugins/cni-c864f
 
 sudo tar -xvf cni-c864f0e1ea73719b8f4582402b0847064f9883b0.tar.gz -C /opt/cni
 ```
-**Note:** Kelsey's guide does not mention this, but the kubernetes binaries look for plugin binaries in /opt/plugin-name/bin/, and then in other paths if nothing is found over there.
+**Note:** Kelsey's guide does not mention this, but the kubernetes binaries will look for plugin binaries in /opt/plugin-name/bin/, and they'll continue to look in other paths if nothing is found.
 
 
 Download and install the Kubernetes worker binaries:
@@ -127,7 +127,7 @@ users:
   user:
     token: chAng3m3" > /var/lib/kubelet/kubeconfig'
 ```
-**Note:** Notice that `server` is specified as 10.240.0.21, which is the IP address of the first controller. We can use the virtual IP of the controllers (which is 10.240.0.20) , but we have not actually configured a load balancer with this IP address yet. So we are just using the IP address of one of the controller nodes. Remember, Kelsey's guide uses the IP address of 10.240.0.20 , but that is the IP address of controller0 in his guide, not the  VIP of controller nodes.
+**Note:** Notice that `server` is specified as 10.240.0.21, which is the IP address of the first controller. We can use the virtual IP of the controllers (which is 10.240.0.20), but we have not actually configured a load balancer with this IP address yet. So, we are just using the IP address of one of the controller nodes. Remember, Kelsey's guide uses the IP address 10.240.0.20, but that is the IP address of controller0 in his guide, not the VIP of controller nodes.
 
 
 Create the kubelet systemd unit file:
@@ -162,7 +162,7 @@ RestartSec=5
 [Install]
 WantedBy=multi-user.target" > /etc/systemd/system/kubelet.service'
 ```
-**Note:** Notice `--configure-cbr0=true` , this enables the container bridge, which from the pool 10.200.0.0/16, and can be any of 10.200.x.0/24 network. Also notice that this service requires the docker service to be up before it starts.
+**Note:** Notice `--configure-cbr0=true`, this enables the container bridge, which is from the pool 10.200.0.0/16, and can be any of 10.200.x.0/24 network. Also notice that this service requires the Docker service to be up before it starts.
 
 
 Start the kubelet service and check that it is running:
@@ -313,7 +313,7 @@ Hint: Some lines were ellipsized, use -l to show in full.
 ```
 
 
-At this point, you should be able to see the nodes as **Ready**.
+At this point you should be able to see the nodes as **Ready**.
 
 ```
 [root@controller1 ~]# kubectl get componentstatuses
@@ -339,10 +339,10 @@ worker2.example.com   Ready     41s
 ------
 ## Some notes on CIDR/CNI IP address showing/not-showing on the worker nodes:
 
-(to do) Add a step to make sure that the worker nodes have got the CIDR IP address. Right now, in my setup, I do not see CIDR addresses assigned to my worker nodes, even though they show up as Ready . 
+(to do) Add a step to make sure that the worker nodes have got the CIDR IP address. Right now, in my setup, I do not see CIDR addresses assigned to my worker nodes even though they are showing as Ready. 
 
 
-( **UPDATE:** I recently found out that the CIDR network assigned to each worker node shows up in the output of `kubectl describe node <NodeName>` command. This is very handy! )
+( **UPDATE:** I recently found out that the CIDR network assigned to each worker node shows up in the output of `kubectl describe node <NodeName>` command. This is very handy!)
 
 ```
 [root@worker1 ~]# ifconfig
