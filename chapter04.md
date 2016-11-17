@@ -1,6 +1,6 @@
 # Chapter 04: SSL Certificates
 
-We have our nodes provisioned, updated and keys synched. The next logical step is to configure Kubernetes software components on the nodes. However, before we do that, we to generate SSL certificates and this chapter will show us how.
+We have our nodes provisioned, updated, and our keys are synched. The next logical step is to configure Kubernetes software components on the nodes. However, before we do that, we need to generate SSL certificates and this chapter will show us how.
 
 # Configure / setup TLS certificates for the cluster:
 
@@ -105,7 +105,7 @@ You can verify that you have a certificate by using the command below:
 openssl x509 -in ca.pem -text -noout
 ```
 
-It should give you the output similar to what is shown below:
+It should give you output similar to what is shown below:
 
 ```
 [kamran@kworkhorse certs-baremetal]$ openssl x509 -in ca.pem -text -noout
@@ -192,7 +192,7 @@ export KUBERNETES_PUBLIC_IP_ADDRESS='10.240.0.20'
 
 ### Create Kubernetes certificate CSR config file:
 
-Be careful in creating this file. Make sure you use all the possible hostnames of the nodes you are generating this certificate for. This includes their FQDNs. When you setup node names like "nodename.example.com" then you need to include that in the CSR config file below. Also add a few extra entries for worker nodes, as you might want to increase the number of worker nodes later in this setup. So even though I have only two worker nodes right now, I have added two extra in the certificate below, worker 3 and 4. The hostnames controller.example.com and kubernetes.example.com are supposed to point to the VIP (10.240.0.20) of the controller nodes. All of these has to go into the infrastructure DNS.
+Be careful when creating this file. Make sure you use all the possible hostnames of the nodes relevant to this certificate. This includes their FQDNs. When you setup node names like "nodename.example.com" you need to include that in the CSR config file below. You should also add a few extra entries as you might want to increase the number of worker nodes later in the setup. So, even though I currently have only two worker nodes I have added two extra in the certificate below, worker 3 and 4. The hostnames controller.example.com and kubernetes.example.com are supposed to point to the VIP (10.240.0.20) of the controller nodes. All of this has to go into the infrastructure DNS.
 
 **Note:** Kelsey's guide set "CN" to be "kubernetes", whereas I set it to "*.example.com" . See: [https://cabforum.org/information-for-site-owners-and-administrators/](https://cabforum.org/information-for-site-owners-and-administrators/)
 
@@ -293,7 +293,7 @@ specifically, section 10.2.3 ("Information Requirements").
 [kamran@kworkhorse certs-baremetal]$
 ```
 
-After you execute the above code, you get the following additional files:
+After you execute the above code you get the following additional files:
 
 ```
 kubernetes-csr.json
