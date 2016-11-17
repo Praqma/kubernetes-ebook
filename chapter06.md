@@ -1,6 +1,6 @@
 # Kubernetes Control nodes
 
-In this chapter we setup Kubernetes master / controller nodes. We setup HA for these nodes in the next chapter.
+In this chapter we'll setup Kubernetes master / controller nodes. We'll setup HA for these nodes in the next chapter.
 
 ## The Kubernetes components that make up the control plane include the following components:
 
@@ -100,7 +100,7 @@ sudo mv authorization-policy.jsonl /var/lib/kubernetes/
 
 ## Create the systemd unit file
 
-We need the IP address of each controller node, when we create the systemd file. We will setup a variable INTERNAL_IP with the IP address of each VM.
+when we create the systemd file we need the IP address of each controller node. We will setup a variable INTERNAL_IP with the IP address of each VM.
 
 ```
 [root@controller1 ~]# export INTERNAL_IP='10.240.0.21'
