@@ -1,18 +1,18 @@
 # Chapter 5: Setup a etcd cluster
 
-In this chapter, we are setting up a three node etcd cluster. Kubernetes needs a data store and etcd works very well for that purpose. 
+In this chapter we will setup up a three node etcd cluster. Kubernetes needs a data store and etcd works very well for that purpose. 
  
 # Configure etcd nodes:
 
-The reason of having dedicated etcd nodes, as explained by Kelsey:
+The reason for having dedicated etcd nodes, as explained by Kelsey:
 
-All Kubernetes components are stateless which greatly simplifies managing a Kubernetes cluster. All state is stored in etcd, which is a database and must be treated special. etcd is being run on a dedicated set of machines for the following reasons:
+All Kubernetes components are stateless, greatly simplifying the management of a Kubernetes cluster. All states are stored in etcd, which is a database and must receive special treatment. etcd is being run on a dedicated set of machines for the following reasons:
 
 * The etcd lifecycle is not tied to Kubernetes. We should be able to upgrade etcd independently of Kubernetes.
 * Scaling out etcd is different than scaling out the Kubernetes Control Plane.
 * Prevent other applications from taking up resources (CPU, Memory, I/O) required by etcd.
 
-First, move the certificates in place.
+First, move the certificates into place.
 
 ```
 [root@etcd1 ~]# sudo mkdir -p /etc/etcd/
@@ -22,7 +22,7 @@ First, move the certificates in place.
 
 
 
-Then, install necessary software on etcd nodes. Remember that the etcd version which comes with Fedora 24 is 2.2, whereas the latest version of etcd available on it's github page is 3.0.7 . So we download and install that one.
+Next, install the necessary software on etcd nodes. Remember that the etcd version which comes with Fedora 24 is 2.2, whereas the latest version of etcd available from its github page is 3.0.7. So, we'll download and install that one.
 
 Do the following steps on both nodes:
 ```
@@ -129,12 +129,12 @@ error #1: dial tcp 127.0.0.1:4001: getsockopt: connection refused
 [root@etcd1 ~]# 
 ```
 
-**Note:** When there is only one node, the etcd cluster will show up as unavailable or misconfigured.
+**Note:** When there is only one node the etcd cluster will show up as unavailable or misconfigured.
 
 
 ## Verify:
 
-After executing all the steps on etcd2 too, I have the following status of services on etcd2:
+After also executing all the steps on etcd2 I have the following status of services on it:
 ```
 [root@etcd2 ~]# systemctl status etcd
 ● etcd.service - etcd
@@ -222,7 +222,7 @@ cluster is healthy
 ```
 
 
-**Note:** (to do) I noticed that when one etcd node (out of total two) was switched off, the worker nodes started having problem:
+**Note:** (to do) I noticed that when one etcd node (out of total two) was switched off the worker nodes started having problems:
 
 ```
 Sep 19 11:21:58 worker1.example.com kubelet[27240]: E0919 11:21:58.974948   27240 kubelet.go:2913] Error updating node status, will retry: client: etcd cluster is unavailable or misconfigured
