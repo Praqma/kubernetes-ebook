@@ -1,4 +1,9 @@
-This document / ebook will show you how to setup a Kubernetes cluster on bare-metal setup. The setup may also consist of VMs instead of real bare-metal machines. You can also implement the same concepts on AWS and GCE clouds, or any other cloud for that matter, such as Digital Ocean, Zetta, etc.
+# Preface:
+This book is inspired by Kelsey Hightower's work on Kubernetes. It tries to address areas which Kelsey's guide ("Kubernetes the Hard Way") does not cover, or are not explained well - or so I understood.
+
+
+This ebook will show you how to setup a Kubernetes cluster on bare-metal. The setup may as well consist of VMs instead of real bare-metal machines. You can also implement the same concepts on AWS and GCE clouds, or any other cloud for that matter, such as Digital Ocean, Zetta, etc - except for the HA bits.
+
 
 **Note:** The order of the chapters can change. This outline will change heavily in the coming days / weeks. 
 
@@ -26,13 +31,14 @@ This document / ebook will show you how to setup a Kubernetes cluster on bare-me
 * also talk about HA for controller nodes.
 * Include access control and Authentication/Authorization, etc.
 
+
 # [Chapter 7: HA for Kubernetes Control Plane](chapter07.md)
-* Here we setup LVS/IPVS/Pacemaker to provide HA to Kubernetes.
+* Here we setup Corosync/Pacemaker to provide HA to Kubernetes.
 
 # [Chapter 8: Kubernetes Worker nodes](chapter08.md)
 * Setup Kubernetes worker nodes. 
 * Including docker
-* Setup networking (flannel or CIDR)
+* Setup networking (CNI/CIDR)
 * Setup remote access with Kubectl
 
 
@@ -49,7 +55,7 @@ This document / ebook will show you how to setup a Kubernetes cluster on bare-me
 * Creating a service using cluster IP and accessing it from within pod network
 * Creating a service using external IP and accessing it from outside the cluster network and also outside of kubernetes cluster.
 
-# [Chapter 11: Praqma Load Balancer](chapter11.md)
+# [Chapter 11: Praqma Load Balancer/Traefik - with HA](chapter11.md)
 
 # [Chapter 12: Accessing HA Kubernetes service from outside the network](chapter12.md)
 
@@ -60,10 +66,4 @@ This document / ebook will show you how to setup a Kubernetes cluster on bare-me
 * Alerting?
 
 [Appendix A: DNS (dnsmasq)](appendix-a.md)
-
-
- 
-
-
-
 
